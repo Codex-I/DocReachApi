@@ -327,7 +327,7 @@ namespace DocReachApi.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error confirming email");
+                _logger.LogError(ex, $"Error confirming email {ex.Message}");
                 return false;
             }
         }

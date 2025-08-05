@@ -305,16 +305,16 @@ namespace DocReachApi.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
+        public async Task<IActionResult> ConfirmEmail([FromBody] EmailConfirmationRequest request)
         {
             try
             {
-                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+                if (string.IsNullOrEmpty(request.UserId) || string.IsNullOrEmpty(request.Token))
                 {
-                    return BadRequest(new { Message = "Invalid confirmation link" });
+                    return BadRequest(new { Message = "Invalid confirmation data" });
                 }
 
-                var result = await _authService.ConfirmEmailAsync(userId, token);
+                var result = await _authService.ConfirmEmailAsync(request.UserId, request.Token);
                 
                 if (result)
                 {
@@ -388,6 +388,32 @@ namespace DocReachApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting user profile");
+                return StatusCode(500, new { Message = "An internal server error occurred" });
+            }
+        }
+
+        /// <summary>
+        /// Debug endpoint to test token generation (for development only)
+        /// </summary>
+        [HttpPost("debug-generate-token")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> DebugGenerateToken([FromBody] ForgotPasswordRequest request)
+        {
+            try
+            {
+                // Use the resend email confirmation service instead
+                var result = await _authService.ResendEmailConfirmationAsync(request.Email);
+                if (!result)
+                {
+                    return BadRequest(new { Message = "User not found or error occurred" });
+                }
+
+                return Ok(new { Message = "Token generated and logged. Check console for details." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating debug token");
                 return StatusCode(500, new { Message = "An internal server error occurred" });
             }
         }
