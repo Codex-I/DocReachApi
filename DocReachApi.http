@@ -1,0 +1,6 @@
+@DocReachApi_HostAddress = http://localhost:5269
+
+GET {{DocReachApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
